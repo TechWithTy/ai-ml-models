@@ -19,8 +19,8 @@ A comprehensive Python library for interacting with various machine learning mod
 | [Google Gemini](gemini/) | ✅ | ✅ | ✅ | Chat, Text Generation |
 | [Anthropic Claude](claude/) | ✅ | ✅ | ✅ | Chat, Text Generation |
 | [DeepSeek](deepseek/) | ✅ | ✅ | ❌ | Chat, Text Generation |
-| [HuggingFace](huggingface/) | ✅ | ✅ | ❌ | Model Inference |
-| [Pollinations](pollinations/) | ✅ | ❌ | ❌ | Image Generation |
+| [HuggingFace](huggingface/) | ✅ | ✅ | ✅ | Model Inference, Text Streaming |
+| [Pollinations](pollinations/) | ✅ | ✅ | ❌ | Text, Image, Audio |
 
 ## 🏗️ Architecture
 
