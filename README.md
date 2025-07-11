@@ -13,14 +13,14 @@ A comprehensive Python library for interacting with various machine learning mod
 
 ## 🚀 Supported Providers
 
-| Provider | Sync | Async | Streaming | Features |
-|----------|------|-------|-----------|----------|
-| [OpenAI](openai/) | ✅ | ✅ | ✅ | Chat, Completions, Embeddings |
-| [Google Gemini](gemini/) | ✅ | ✅ | ✅ | Chat, Text Generation |
-| [Anthropic Claude](claude/) | ✅ | ✅ | ✅ | Chat, Text Generation |
-| [DeepSeek](deepseek/) | ✅ | ✅ | ❌ | Chat, Text Generation |
-| [HuggingFace](huggingface/) | ✅ | ✅ | ✅ | Model Inference, Text Streaming |
-| [Pollinations](pollinations/) | ✅ | ✅ | ❌ | Text, Image, Audio |
+| Provider | Text | Image | Audio | Sync | Async | Streaming |
+|---|---|---|---|---|---|---|
+| [OpenAI](openai/) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| [Google Gemini](gemini/) | ✅ | ✅ | ❌ | ✅ | ✅ | ✅ |
+| [Anthropic Claude](claude/) | ✅ | ❌ | ❌ | ✅ | ✅ | ✅ |
+| [DeepSeek](deepseek/) | ✅ | ❌ | ❌ | ✅ | ✅ | ✅ |
+| [HuggingFace](huggingface/) | ✅ | ✅ | ❌ | ✅ | ❌ | ❌ |
+| [Pollinations](pollinations/) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ (simulated) |
 
 ## 🏗️ Architecture
 
