@@ -1,0 +1,9 @@
+[submodule "kling"]
+	path = kling
+	url = https://github.com/TechWithTy/kling.git
+[submodule "heygen"]
+	path = heygen
+	url = https://github.com/TechWithTy/heygen_content.git
+[submodule "glif"]
+	path = glif
+	url = https://github.com/TechWithTy/glif-client-python

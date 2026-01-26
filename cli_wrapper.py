@@ -229,7 +229,6 @@ async def run_deepseek(args: argparse.Namespace) -> Dict[str, Any]:
         response = await client.generate_text_async(args.prompt)
         return response
     except Exception as e:
-    except Exception as e:
         return {"status": "error", "message": str(e), "provider": "deepseek"}
 
 async def run_reachy(args: argparse.Namespace) -> Dict[str, Any]:
@@ -249,9 +248,58 @@ async def run_reachy(args: argparse.Namespace) -> Dict[str, Any]:
     except Exception as e:
         return {"status": "error", "message": str(e), "provider": "reachy"}
 
+async def run_kling(args: argparse.Namespace) -> Dict[str, Any]:
+    try:
+        from kling_provider.kling_generator import KlingGenerator
+        client = KlingGenerator()
+        
+        # Determine image url if provided (for Image-to-Video)
+        image_url = args.image_input if args.image_input else None
+        
+        # For now generic args or defaults
+        return await client.generate_video(
+            prompt=args.prompt,
+            image_url=image_url
+        )
+    except Exception as e:
+        return {"status": "error", "message": str(e), "provider": "kling"}
+
+async def run_heygen(args: argparse.Namespace) -> Dict[str, Any]:
+    try:
+        from heygen_provider.heygen_generator import HeyGenGenerator
+        client = HeyGenGenerator()
+        
+        return await client.generate_video(
+            prompt=args.prompt,
+            avatar_id=args.model  # Use --model for avatar selection
+        )
+    except Exception as e:
+        return {"status": "error", "message": str(e), "provider": "heygen"}
+
+async def run_glif(args: argparse.Namespace) -> Dict[str, Any]:
+    try:
+        from glif_provider.glif_generator import GlifGenerator
+        client = GlifGenerator()
+        
+        # Workflow ID should be passed via --model flag
+        workflow_id = args.model
+        if not workflow_id:
+            return {
+                "status": "error",
+                "message": "Glif requires a workflow ID. Pass via --model flag.",
+                "provider": "glif"
+            }
+        
+        return await client.run_workflow(
+            workflow_id=workflow_id,
+            inputs=[args.prompt] if args.prompt else []
+        )
+    except Exception as e:
+        return {"status": "error", "message": str(e), "provider": "glif"}
+
 async def main():
     parser = argparse.ArgumentParser(description="AI ML Models CLI Wrapper")
-    parser.add_argument("--provider", required=True, choices=["openai", "gemini", "pollinations", "claude", "openrouter", "huggingface", "deepseek", "reachy"], help="Model provider")
+    parser.add_argument("--provider", required=True, choices=["openai", "gemini", "pollinations", "claude", "openrouter", "huggingface", "deepseek", "reachy", "kling", "heygen", "glif"], help="Model provider")
     parser.add_argument("--prompt", required=True, help="Text prompt")
     parser.add_argument("--model", help="Model name (optional)")
     parser.add_argument("--image", action="store_true", help="Generate image instead of text")
@@ -294,6 +342,12 @@ async def main():
         result = await run_deepseek(args)
     elif args.provider == "reachy":
         result = await run_reachy(args)
+    elif args.provider == "kling":
+        result = await run_kling(args)
+    elif args.provider == "heygen":
+        result = await run_heygen(args)
+    elif args.provider == "glif":
+        result = await run_glif(args)
         
     print(json.dumps(result, indent=2))
 
