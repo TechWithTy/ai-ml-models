@@ -1,6 +1,6 @@
 from typing import Optional, Dict, Any
 import requests
-from src.ml_models.base_generator import BaseGenerator
+from base_generator import BaseGenerator
 
 class ClaudeGenerator(BaseGenerator):
     """
@@ -12,7 +12,7 @@ class ClaudeGenerator(BaseGenerator):
         self.temperature = self.config.get("temperature", 0.7)
         self.max_tokens = self.config.get("max_tokens", 500)
 
-    def send_message(self) -> Dict[str, Any]:
+    def send_message(self, prompt_text: Optional[str] = None, model: Optional[str] = None, **kwargs) -> Dict[str, Any]:
         """
         Sends a blog post to Claude AI and returns a structured result.
         """
@@ -23,22 +23,56 @@ class ClaudeGenerator(BaseGenerator):
             "Content-Type": "application/json",
         }
         state = self.get_prompt_state()
-        prompt = state["prompt"]
-        system_instructions = state["system_instructions"]
-        if not prompt:
-            print("No Prompt Given Claude")
-            return {"status": "error", "message": "No prompt given"}
-        data = {
-            "model": self.claude_model,
-            "max_tokens": self.max_tokens,
-            "temperature": self.temperature,
-            "messages": [
+        prompt = prompt_text or state.get("prompt")
+        # Use provided model or config default (updated default to 3.5 Sonnet)
+        target_model = model or self.claude_model or "claude-3-5-sonnet-latest"
+        
+        # Handle prompt caching
+        anthropic_headers = headers.copy()
+        messages_payload = []
+        
+        if kwargs.get("enable_caching"):
+             anthropic_headers["anthropic-beta"] = "prompt-caching-2024-07-31"
+             
+             # Cache the system prompt if provided
+             if system_instructions:
+                  pass # System caching structure is different, keeping simple for now
+             
+             # Mark the user content for caching (ephemeral)
+             messages_payload.append({
+                 "role": "user", 
+                 "content": [
+                     {
+                         "type": "text", 
+                         "text": prompt, 
+                         "cache_control": {"type": "ephemeral"}
+                     }
+                 ]
+             })
+        else:
+             messages_payload = [
                 {"role": "system", "content": system_instructions},
                 {"role": "user", "content": prompt},
-            ],
+            ]
+        
+        # Adjust for 'system' role separation in modern API if needed, 
+        # normally system is a top-level param, but messages list works for simple cases.
+        # Actually, modern Anthropic API prefers 'system' as top level param, not in messages.
+        # Let's fix that while we are here.
+        
+        data = {
+            "model": target_model,
+            "max_tokens": self.max_tokens,
+            "temperature": self.temperature,
+            "system": system_instructions,
+            "messages": [
+                 {"role": "user", 
+                  "content": [{"type": "text", "text": prompt, "cache_control": {"type": "ephemeral"}} if kwargs.get("enable_caching") else prompt}
+            ]
         }
+        
         try:
-            response = requests.post(url, headers=headers, json=data)
+            response = requests.post(url, headers=anthropic_headers, json=data)
             try:
                 response_json = response.json()
             except Exception as e:

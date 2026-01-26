@@ -2,8 +2,8 @@ import httpx
 import json
 from typing import Any, AsyncGenerator, Dict, Optional
 
-from ..base_generator import BaseGenerator
-from ..base_streaming_generator import BaseStreamingGenerator, StreamEvent, StreamEventType
+from base_generator import BaseGenerator
+from base_streaming_generator import BaseStreamingGenerator, StreamEvent, StreamEventType
 
 class DeepSeekClient(BaseGenerator, BaseStreamingGenerator):
     """Client for interacting with the DeepSeek API, with async and streaming support."""
@@ -75,3 +75,9 @@ class DeepSeekClient(BaseGenerator, BaseStreamingGenerator):
             yield StreamEvent(event_type=StreamEventType.ERROR, error=e)
         finally:
             yield StreamEvent(event_type=StreamEventType.DONE)
+
+    async def stream_audio(self, text: str, voice: Optional[str] = None, **kwargs) -> AsyncGenerator[StreamEvent[bytes], None]:
+        yield StreamEvent(event_type=StreamEventType.ERROR, error=NotImplementedError("Audio streaming not supported"))
+
+    async def stream_image(self, prompt: str, **kwargs) -> AsyncGenerator[StreamEvent[bytes], None]:
+        yield StreamEvent(event_type=StreamEventType.ERROR, error=NotImplementedError("Image streaming not supported"))

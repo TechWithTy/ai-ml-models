@@ -1,11 +1,12 @@
 import requests
 from typing import Optional
-from utils.index import get_env_variable
-from utils.prompt_builder import get_prompt_globals
-from utils.config.config_loader import config
+import os
+from dotenv import load_dotenv
 
-OPENAI_API_KEY: Optional[str] = get_env_variable("OPENAI_API_KEY")
-openai_config = config.get("user_profile", {}).get("llm", {}).get("OpenAI", {})
+load_dotenv()
+
+OPENAI_API_KEY: Optional[str] = os.getenv("OPENAI_API_KEY")
+openai_config = {}
 
 def create_openai_assistant() -> str:
     url = "https://api.openai.com/v1/assistants"

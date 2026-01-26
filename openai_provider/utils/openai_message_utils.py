@@ -1,16 +1,14 @@
 import requests
 from typing import Optional, Dict, Any
-from utils.index import get_env_variable
-from utils.prompt_builder import get_prompt_globals
-from utils.config.config_loader import config
+import os
+from dotenv import load_dotenv
 
-OPENAI_API_KEY: Optional[str] = get_env_variable("OPENAI_API_KEY")
-OPENAI_ASSISTANT_ID: Optional[str] = get_env_variable("OPENAI_ASSISTANT_ID")
+load_dotenv()
 
-state = get_prompt_globals()
-prompt = state["prompt"]
-system_instructions = state["system_instructions"]
-openai_config = config.get("user_profile", {}).get("llm", {}).get("OpenAI", {})
+OPENAI_API_KEY: Optional[str] = os.getenv("OPENAI_API_KEY")
+OPENAI_ASSISTANT_ID: Optional[str] = os.getenv("OPENAI_ASSISTANT_ID")
+system_instructions = "You are a helpful assistant."
+prompt = None
 
 def create_openai_thread() -> Optional[str]:
     url = "https://api.openai.com/v1/threads"

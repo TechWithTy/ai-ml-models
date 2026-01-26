@@ -39,19 +39,76 @@ class GeminiClient:
             raise AuthenticationError("Gemini API key not found. Please set the GEMINI_API_KEY environment variable.")
         genai.configure(api_key=self.api_key)
 
-    def generate_content(self, model: GeminiModel, prompt: any) -> GenerateContentResponse:
-        """Generates content using the specified model and prompt.
+    def generate_content(
+        self, 
+        model: GeminiModel, 
+        prompt: any,
+        media_path: Optional[str] = None,
+        media_mime_type: Optional[str] = None,
+        system_instruction: Optional[str] = None,
+        json_mode: bool = False,
+        tools: Optional[list] = None
+    ) -> GenerateContentResponse:
+        """Generates content using the specified model and prompt, optionally with media/tools.
 
         Args:
             model: The Gemini model to use.
             prompt: The prompt to send to the model.
+            media_path: Path to media file (image/video/audio).
+            media_mime_type: MIME type of the media.
+            system_instruction: System instructions for the model.
+            json_mode: If True, enforces application/json output.
+            tools: List of tools (functions) to bind to the model.
 
         Returns:
             A GenerateContentResponse object with the generated text.
         """
         try:
-            model_instance = genai.GenerativeModel(model.value)
-            response = model_instance.generate_content(prompt)
+            # Configure generation config
+            generation_config = {}
+            if json_mode:
+                generation_config["response_mime_type"] = "application/json"
+            
+            # Initialize model with system instructions and tools if provided
+            model_instance = genai.GenerativeModel(
+                model_name=model.value,
+                system_instruction=system_instruction,
+                tools=tools
+            )
+            
+            content_parts = [prompt]
+            
+            if media_path:
+                if not media_mime_type:
+                    # Simple extension-based guess if not provided
+                    ext = media_path.split(".")[-1].lower()
+                    if ext in ["jpg", "jpeg", "png"]: media_mime_type = f"image/{ext}"
+                    elif ext == "mp4": media_mime_type = "video/mp4"
+                    elif ext == "mp3": media_mime_type = "audio/mp3"
+                    elif ext == "wav": media_mime_type = "audio/wav"
+                
+                try:
+                    uploaded_file = genai.upload_file(path=media_path, mime_type=media_mime_type)
+                    
+                    # For video, we might need to wait for processing? 
+                    # The SDK suggests waiting for state=ACTIVE generally for video.
+                    import time
+                    while uploaded_file.state.name == "PROCESSING":
+                        time.sleep(1)
+                        uploaded_file = genai.get_file(uploaded_file.name)
+                        
+                    if uploaded_file.state.name == "FAILED":
+                         raise ValueError("Gemini File API processing failed.")
+                         
+                    content_parts.append(uploaded_file)
+                    
+                except Exception as upload_err:
+                     raise upload_err
+
+            response = model_instance.generate_content(
+                content_parts, 
+                generation_config=generation_config
+            )
             return GenerateContentResponse(text=response.text, raw_response=response)
         except Exception as e:
             handle_api_error(e)
