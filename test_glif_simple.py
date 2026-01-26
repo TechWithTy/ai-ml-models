@@ -11,10 +11,14 @@ async def test_glif():
     load_dotenv(env_path)
     
     api_key = os.getenv("GLIF_API_KEY")
-    print(f"GLIF_API_KEY found: {bool(api_key)}")
+    if not api_key:
+        print("GLIF_API_KEY not found in .env")
+        api_key = input("Enter GLIF_API_KEY (or press Enter to fail): ").strip()
+    
+    print(f"GLIF_API_KEY provided: {bool(api_key)}")
     
     if not api_key:
-        print("Error: GLIF_API_KEY not found")
+        print("Error: No API key provided")
         return
 
     url = "https://simple-api.glif.app"
