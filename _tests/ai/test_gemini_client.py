@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import patch, MagicMock, AsyncMock
 
-from ml_models.gemini import (
+from app.core.ml_models.gemini import (
     GeminiClient,
     GeminiModel,
     AuthenticationError,
